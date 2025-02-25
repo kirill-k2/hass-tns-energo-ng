@@ -1,5 +1,5 @@
 """
-Sensor for Inter RAO cabinet.
+Sensor for TNS Energo cabinet.
 Retrieves indications regarding current state of accounts.
 """
 import logging

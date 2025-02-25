@@ -1,9 +1,8 @@
-"""Inter RAO integration config and option flow handlers"""
+"""TNS Energo integration config and option flow handlers"""
 import asyncio
 import logging
 from collections import OrderedDict
 from datetime import timedelta
-from functools import partial
 from typing import (
     Any,
     ClassVar,
@@ -13,8 +12,6 @@ from typing import (
     Mapping,
     Optional,
     TYPE_CHECKING,
-    Type,
-    Union,
 )
 
 import voluptuous as vol
@@ -40,7 +37,8 @@ from custom_components.tns_energo.const import (
     DATA_ENTITIES,
     DOMAIN,
 )
-from tns_energo_api import Account, TNSEnergoAPI, TNSEnergoException
+from tns_energo_api import Account, TNSEnergoAPI, Meter
+from tns_energo_api.exceptions import TNSEnergoException
 
 if TYPE_CHECKING:
     from custom_components.tns_energo._base import TNSEnergoEntity
@@ -61,7 +59,7 @@ def _flatten(conf: Any):
 
 
 class TNSEnergoConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Inter RAO config entries."""
+    """Handle a config flow for TNS Energo config entries."""
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
@@ -175,11 +173,6 @@ class TNSEnergoConfigFlow(ConfigFlow, domain=DOMAIN):
             data={CONF_USERNAME: username},
         )
 
-    # @staticmethod
-    # @callback
-    # def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
-    #     return Inter RAOOptionsFlow(config_entry)
-
 
 CONF_DISABLE_ACCOUNTS = "disable_" + CONF_ACCOUNTS
 CONF_DISABLE_METERS = "disable_" + CONF_METERS
@@ -188,7 +181,7 @@ CONF_USE_TEXT_FIELDS = "use_text_fields"
 
 
 class TNSEnergoOptionsFlow(OptionsFlow):
-    """Handler for Inter RAO options"""
+    """Handler for TNS Energo options"""
 
     def __init__(self, config_entry: ConfigEntry):
         self.config_entry = config_entry
@@ -196,17 +189,16 @@ class TNSEnergoOptionsFlow(OptionsFlow):
         self.config_codes: Optional[Dict[str, List[str]]] = None
 
     async def async_fetch_config_codes(self):
-        api: "BaseEnergosbytAPI" = self.hass.data[DATA_API_OBJECTS][self.config_entry.entry_id]
-        accounts = await api.async_update_accounts(with_related=True)
+        api: "TNSEnergoAPI" = self.hass.data[DATA_API_OBJECTS][self.config_entry.entry_id]
+        accounts = await api.async_get_accounts_list()
         account_codes = {account.code for account in accounts.values() if account.code is not None}
 
         aws = (
             account.async_get_meters()
             for account in accounts
-            if isinstance(account, AbstractAccountWithMeters)
         )
 
-        meters_maps: Iterable[Mapping[int, "AbstractMeter"]] = await asyncio.gather(*aws)
+        meters_maps: Iterable[Mapping[str, "Meter"]] = await asyncio.gather(*aws)
         meter_codes = set()
 
         for meters_map in meters_maps:
@@ -225,7 +217,7 @@ class TNSEnergoOptionsFlow(OptionsFlow):
             try:
                 self.config_codes = await self.async_fetch_config_codes()
                 config_codes = self.config_codes
-            except EnergosbytException:
+            except TNSEnergoException:
                 self.use_text_fields = True
                 config_codes = {}
 
