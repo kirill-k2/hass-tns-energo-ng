@@ -18,9 +18,10 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.typing import ConfigType, HomeAssistantType
+from homeassistant.helpers.typing import ConfigType
 
 from custom_components.tns_energo._base import UpdateDelegatorsDataType
 from custom_components.tns_energo._schema import CONFIG_ENTRY_SCHEMA
@@ -81,7 +82,7 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 
-async def async_setup(hass: HomeAssistantType, config: ConfigType):
+async def async_setup(hass: HomeAssistant, config: ConfigType):
     """Set up the TNS Energo component."""
     domain_config = config.get(DOMAIN)
     if not domain_config:
@@ -162,7 +163,7 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType):
     return True
 
 
-async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entries.ConfigEntry):
+async def async_setup_entry(hass: HomeAssistant, config_entry: config_entries.ConfigEntry):
     username = config_entry.data[CONF_USERNAME]
     unique_key = username
     entry_id = config_entry.entry_id
@@ -264,7 +265,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
                         else "Received empty response to accounts request"
                     )
                 )
-            except TNSEnergoException:
+            except TNSEnergoException as e:
                 log_message = (
                     (
                         "Ошибка получения данных о лицевых счетах"
@@ -337,7 +338,7 @@ async def async_setup_entry(hass: HomeAssistantType, config_entry: config_entrie
 
 
 async def async_reload_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config_entry: config_entries.ConfigEntry,
 ) -> None:
     """Reload Lkcomu TNS Energo entry"""
@@ -350,7 +351,7 @@ async def async_reload_entry(
 
 
 async def async_unload_entry(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config_entry: config_entries.ConfigEntry,
 ) -> bool:
     """Unload Lkcomu TNS Energo entry"""

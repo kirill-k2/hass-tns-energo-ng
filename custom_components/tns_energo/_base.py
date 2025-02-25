@@ -38,9 +38,10 @@ from urllib.parse import urlparse
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_DEFAULT, CONF_SCAN_INTERVAL, CONF_USERNAME
 from homeassistant.helpers import entity_platform
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.typing import ConfigType, HomeAssistantType, StateType
+from homeassistant.helpers.typing import ConfigType, StateType
 from homeassistant.util import as_local, utcnow
 
 from custom_components.tns_energo._util import IS_IN_RUSSIA, mask_username, with_auto_auth
@@ -82,7 +83,7 @@ def make_common_async_setup_entry(
     entity_cls: Type["TNSEnergoEntity"], *args: Type["TNSEnergoEntity"]
 ):
     async def _async_setup_entry(
-        hass: HomeAssistantType,
+        hass: HomeAssistant,
         config_entry: ConfigEntry,
         async_add_devices,
     ):
@@ -116,7 +117,7 @@ def make_common_async_setup_entry(
 
 
 async def async_register_update_delegator(
-    hass: HomeAssistantType,
+    hass: HomeAssistant,
     config_entry: ConfigEntry,
     platform: str,
     async_add_entities: AddEntitiesCallType,
@@ -139,7 +140,7 @@ async def async_register_update_delegator(
 DEV_CLASSES_PROCESSED = set()
 
 
-async def async_refresh_api_data(hass: HomeAssistantType, config_entry: ConfigEntry):
+async def async_refresh_api_data(hass: HomeAssistant, config_entry: ConfigEntry):
     entry_id = config_entry.entry_id
 
     update_delegators: UpdateDelegatorsDataType = hass.data[DATA_UPDATE_DELEGATORS][entry_id]
@@ -393,7 +394,7 @@ class TNSEnergoEntity(Entity, Generic[_TAccount]):
     #################################################################################
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return the attribute(s) of the sensor"""
 
         attributes = {
