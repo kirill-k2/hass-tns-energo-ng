@@ -1,14 +1,14 @@
 {
+  "domain": "tns_energo",
+  "name": "TNS Energo Personal Cabinet",
   "codeowners": [
     "@alryaz"
   ],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/alryaz/hass-tns-energo",
-  "domain": "tns_energo",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/alryaz/hass-tns-energo/issues",
-  "name": "TNS Energo Personal Cabinet",
   "requirements": [
     "tns-energo-api==0.0.5"
   ],

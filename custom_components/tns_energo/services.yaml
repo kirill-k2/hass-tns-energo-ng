@@ -79,6 +79,7 @@ calculate_indications:
       selector:
         boolean:
     ignore_indications:
+      name: 'Игнорировать ограничения'
       description: 'Игнорировать ограничения по показаниям'
       required: false
       advanced: true
@@ -97,6 +98,7 @@ set_description:
       device_class: tns_energo_account
   fields:
     description:
+      name: 'Описание'
       description: 'Описание'
       required: false
       advanced: false
